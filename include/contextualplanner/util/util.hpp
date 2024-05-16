@@ -51,6 +51,11 @@ void split(std::vector<std::string>& pStrs,
            const std::string& pStr,
            const std::string& pSeparator);
 
+
+void ltrim(std::string& s);
+void rtrim(std::string& s);
+void trim(std::string& s);
+
 template <typename T>
 T lexical_cast(const std::string& pStr)
 {

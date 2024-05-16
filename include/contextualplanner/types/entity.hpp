@@ -3,20 +3,25 @@
 
 #include <string>
 #include "../util/api.hpp"
-
+#include "type.hpp"
 
 namespace cp
 {
+struct SetOfTypes;
+
 
 struct CONTEXTUALPLANNER_API Entity
 {
-  Entity(std::string pValue,
-         std::string pType = "");
+  Entity(const std::string& pValue,
+         const Type& pType = Type(""));
 
   static Entity createAnyEntity();
+  static Entity fromStr(const std::string& pStr,
+                        const SetOfTypes& pSetOfTypes);
+  std::string toStr() const;
 
   std::string value;
-  std::string type;
+  Type type;
 };
 
 } // !cp

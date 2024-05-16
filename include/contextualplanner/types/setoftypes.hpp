@@ -19,6 +19,8 @@ struct CONTEXTUALPLANNER_API SetOfTypes
   void addType(const std::string& pTypeToAdd,
                const std::string& pParentType = "");
 
+  Type nameToType(const std::string& pName) const;
+
   std::list<std::string> typesToStrs() const;
   std::string typesToStr() const;
 

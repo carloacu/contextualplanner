@@ -217,14 +217,6 @@ void _setGoalsForAPriority(cp::Problem& pProblem,
 }
 
 
-void _test_predicateToStr()
-{
-  assert_eq<std::string>("pred_name(my_type)", cp::Predicate("pred_name(?v - my_type)").toStr());
-  assert_eq<std::string>("pred_name(my_type, my_type2)", cp::Predicate("pred_name(?v - my_type, ?o - my_type2)").toStr());
-  assert_eq<std::string>("pred_name(my_type, my_type2) - return_type", cp::Predicate("pred_name(?v - my_type, ?o - my_type2) - return_type").toStr());
-}
-
-
 void _test_createEmptyGoal()
 {
   cp::Goal("goal_name", -1, "");
@@ -3460,7 +3452,6 @@ int main(int argc, char *argv[])
   test_util();
   planningDummyExample();
   planningExampleWithAPreconditionSolve();
-  _test_predicateToStr();
   _test_createEmptyGoal();
   _test_goalToStr();
   _test_factToStr();

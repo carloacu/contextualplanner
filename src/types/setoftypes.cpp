@@ -7,25 +7,6 @@
 
 namespace cp
 {
-namespace
-{
-// trim from start (in place)
-void _ltrim(std::string& s)
-{
-  s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](int ch) {
-    return !std::isspace(ch);
-  }));
-}
-
-// trim from end (in place)
-void _rtrim(std::string& s) {
-    s.erase(std::find_if(s.rbegin(), s.rend(), [](int ch) {
-        return !std::isspace(ch);
-    }).base(), s.end());
-}
-
-}
-
 
 SetOfTypes::SetOfTypes()
     : _types(),
@@ -52,8 +33,8 @@ SetOfTypes SetOfTypes::fromStr(const std::string& pStr)
     if (typeWithParentType.size() > 1)
     {
       parentType = typeWithParentType[1];
-      _ltrim(parentType);
-      _rtrim(parentType);
+      ltrim(parentType);
+      rtrim(parentType);
     }
 
     auto typesStrs = typeWithParentType[0];
@@ -87,6 +68,14 @@ void SetOfTypes::addType(const std::string& pTypeToAdd,
   auto type = Type(pTypeToAdd, it->second);
   it->second->subTypes.push_back(type);
   _nameToType[pTypeToAdd] = &it->second->subTypes.back();
+}
+
+Type SetOfTypes::nameToType(const std::string& pName) const
+{
+  auto it = _nameToType.find(pName);
+  if (it != _nameToType.end())
+    return *it->second;
+  throw std::runtime_error("\"" + pName + "\" isa not a valid type name");
 }
 
 
