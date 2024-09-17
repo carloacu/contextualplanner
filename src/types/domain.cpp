@@ -72,6 +72,9 @@ Domain::Domain(const std::map<ActionId, Action>& pActions,
 
   if (!pSetOfInferences.empty())
     _setOfInferences.emplace(setOfInferencesIdFromConstructor, pSetOfInferences);
+
+  for (auto& currAction: _actions)
+    currAction.second.updateSuccessionCache(*this, currAction.first);
 }
 
 

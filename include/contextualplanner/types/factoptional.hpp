@@ -53,6 +53,9 @@ struct CONTEXTUALPLANNER_API FactOptional
                std::size_t pBeginPos = 0,
                std::size_t* pResPos = nullptr);
 
+  /// Specify an order beween optional facts. It alows to use this type as key of map containers.
+  bool operator<(const FactOptional& pOther) const;
+
   /// Set content from another optional fact.
   void operator=(const FactOptional& pOther);
 

@@ -29,6 +29,23 @@ void Action::replaceArgument(const Entity& pOld,
 }
 
 
+void Action::updateSuccessionCache(const Domain& pDomain,
+                                   const ActionId& pIdOfThisAction)
+{
+  if (precondition)
+    _successionsCache.update(pDomain, pIdOfThisAction, "", "", *precondition,
+                             effect.worldStateModification, effect.potentialWorldStateModification);
+  else
+    _successionsCache.clear();
+}
+
+std::string Action::printSuccessionCache() const
+{
+  return _successionsCache.print();
+}
+
+
+
 void Action::throwIfNotValid(const WorldState& pWorldState)
 {
   _throwIfNotValidForACondition(precondition);

@@ -1,0 +1,7 @@
+#ifndef TEST_SUCCESSIONSCACHE_HPP
+#define TEST_SUCCESSIONSCACHE_HPP
+
+void test_successionsCache();
+
+#endif // TEST_SUCCESSIONSCACHE_HPP
+

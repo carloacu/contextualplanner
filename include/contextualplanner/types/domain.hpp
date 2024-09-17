@@ -19,6 +19,10 @@ struct CONTEXTUALPLANNER_API Domain
   /// Construct an empty domain.
   Domain();
 
+  // Do not permit to copy an action
+  Domain(const Domain& pOther) = default;
+  Domain& operator=(const Domain& pOther) = default;
+
   /**
    * @brief Construct a domain.
    * @param[in] pActions Map of action identifiers to action.

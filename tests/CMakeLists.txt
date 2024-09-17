@@ -23,6 +23,8 @@ add_executable(
   src/test_setoffacts.cpp
   src/test_arithmeticevaluator.hpp
   src/test_arithmeticevaluator.cpp
+  src/test_successionscache.hpp
+  src/test_successionscache.cpp
   src/docexamples/test_planningDummyExample.hpp
   src/docexamples/test_planningDummyExample.cpp
   src/docexamples/test_planningExampleWithAPreconditionSolve.hpp

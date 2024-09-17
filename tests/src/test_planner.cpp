@@ -11,6 +11,7 @@
 #include "test_facttoconditions.hpp"
 #include "test_ontology.hpp"
 #include "test_setoffacts.hpp"
+#include "test_successionscache.hpp"
 #include "test_util.hpp"
 #include "docexamples/test_planningDummyExample.hpp"
 #include "docexamples/test_planningExampleWithAPreconditionSolve.hpp"
@@ -588,6 +589,7 @@ int main(int argc, char *argv[])
   test_factToConditions();
   test_setOfFacts();
   test_ontology();
+  test_successionsCache();
   test_util();
   planningDummyExample();
   planningExampleWithAPreconditionSolve();

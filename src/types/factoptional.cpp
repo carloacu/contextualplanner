@@ -46,6 +46,12 @@ FactOptional::FactOptional(const std::string& pStr,
 {
 }
 
+bool FactOptional::operator<(const FactOptional& pOther) const
+{
+  if (isFactNegated != pOther.isFactNegated)
+    return isFactNegated < pOther.isFactNegated;
+  return fact < pOther.fact;
+}
 
 void FactOptional::operator=(const FactOptional& pOther)
 {

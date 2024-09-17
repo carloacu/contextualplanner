@@ -57,6 +57,8 @@ struct CONTEXTUALPLANNER_API WorldStateModification
   virtual void replaceArgument(const Entity& pOld,
                                const Entity& pNew) = 0;
 
+  virtual void forAllFactOpt(const std::function<void (const FactOptional&)>& pFactCallback) const = 0;
+
   /**
    * @brief Iterate over all the optional facts with fact value resolution according to the world state.
    * @param[in] pFactCallback Callback called for each optional fact of this object.

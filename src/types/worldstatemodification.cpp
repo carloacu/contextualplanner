@@ -95,6 +95,7 @@ struct WorldStateModificationNode : public WorldStateModification
       rightOperand->replaceArgument(pOldFact, pNewFact);
   }
 
+  void forAllFactOpt(const std::function<void (const FactOptional&)>& pFactCallback) const override;
   void forAll(const std::function<void (const FactOptional&)>& pFactCallback,
               const WorldState& pWorldState) const override;
   void iterateOverAllAccessibleFacts(const std::function<void (const FactOptional&)>& pFactCallback,
@@ -187,6 +188,7 @@ struct WorldStateModificationFact : public WorldStateModification
     factOptional.fact.replaceArgument(pOld, pNew);
   }
 
+  void forAllFactOpt(const std::function<void (const FactOptional&)>& pFactCallback) const override { pFactCallback(factOptional); }
   void forAll(const std::function<void (const FactOptional&)>& pFactCallback,
               const WorldState&) const override { pFactCallback(factOptional); }
 
@@ -260,6 +262,7 @@ struct WorldStateModificationNumber : public WorldStateModification
 
   void replaceArgument(const Entity&,
                        const Entity&) override {}
+  void forAllFactOpt(const std::function<void (const FactOptional&)>&) const override {}
   void forAll(const std::function<void (const FactOptional&)>&,
               const WorldState&) const override {}
   void iterateOverAllAccessibleFacts(const std::function<void (const FactOptional&)>&,
@@ -357,6 +360,37 @@ std::string WorldStateModificationNode::toStr(bool pPrintAnyFluent) const
   }
   return "";
 }
+
+
+void WorldStateModificationNode::forAllFactOpt(const std::function<void (const FactOptional&)>& pFactCallback) const
+{
+  if (nodeType == WorldStateModificationNodeType::AND)
+  {
+    if (leftOperand)
+      leftOperand->forAllFactOpt(pFactCallback);
+    if (rightOperand)
+      rightOperand->forAllFactOpt(pFactCallback);
+  }
+  else if (nodeType == WorldStateModificationNodeType::ASSIGN && leftOperand)
+  {
+    auto* leftFactPtr = _toWmFact(*leftOperand);
+    if (leftFactPtr != nullptr)
+      pFactCallback(leftFactPtr->factOptional);
+  }
+  else if (nodeType == WorldStateModificationNodeType::FOR_ALL)
+  {
+    if (rightOperand)
+      rightOperand->forAllFactOpt(pFactCallback);
+  }
+  else if ((nodeType == WorldStateModificationNodeType::INCREASE || nodeType == WorldStateModificationNodeType::DECREASE) &&
+           leftOperand)
+  {
+    auto* leftFactPtr = _toWmFact(*leftOperand);
+    if (leftFactPtr != nullptr)
+      pFactCallback(leftFactPtr->factOptional);
+  }
+}
+
 
 void WorldStateModificationNode::forAll(const std::function<void (const FactOptional&)>& pFactCallback,
                                         const WorldState& pWorldState) const
