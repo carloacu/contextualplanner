@@ -31,7 +31,6 @@ set(CHATBOTPLANNER_HPPS
     include/contextualplanner/types/setofinferences.hpp
     include/contextualplanner/types/setofpredicates.hpp
     include/contextualplanner/types/setoftypes.hpp
-    include/contextualplanner/types/successionscache.hpp
     include/contextualplanner/types/type.hpp
     include/contextualplanner/types/worldstate.hpp
     include/contextualplanner/types/worldstatemodification.hpp
@@ -80,7 +79,6 @@ set(CHATBOTPLANNER_SRCS
     src/types/setofinferences.cpp
     src/types/setofpredicates.cpp
     src/types/setoftypes.cpp
-    src/types/successionscache.cpp
     src/types/treeofalreadydonepaths.hpp
     src/types/treeofalreadydonepaths.cpp
     src/types/type.cpp

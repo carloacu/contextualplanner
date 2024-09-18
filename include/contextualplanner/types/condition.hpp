@@ -150,6 +150,8 @@ struct CONTEXTUALPLANNER_API Condition
   virtual std::unique_ptr<Condition> clone(const std::map<Parameter, Entity>* pConditionParametersToArgumentPtr = nullptr,
                                            bool pInvert = false) const = 0;
 
+  std::set<FactOptional> getFactToIgnoreInCorrespondingEffect() const;
+
   /// Cast to ConditionNode* is possible.
   virtual const ConditionNode* fcNodePtr() const = 0;
   virtual ConditionNode* fcNodePtr() = 0;

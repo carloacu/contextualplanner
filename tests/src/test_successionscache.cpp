@@ -83,12 +83,12 @@ void test_successionsCache()
   const auto& actionsFromDomain = domain.actions();
   {
     const Action& actionObj1 = actionsFromDomain.find(action1)->second;
-    assert_eq<std::string>("fact: fact_b(?e)\n"
-                           "action: action2\n"
-                           "action: action5\n"
+    assert_eq<std::string>("fact: !fact_a\n"
+                           "action: action4\n"
                            "\n"
-                           "fact: !fact_a\n"
-                           "action: action4\n", actionObj1.printSuccessionCache());
+                           "fact: fact_b(?e)\n"
+                           "action: action2\n"
+                           "action: action5\n", actionObj1.printSuccessionCache());
   }
   {
     const Action& actionObj2 = actionsFromDomain.find(action2)->second;

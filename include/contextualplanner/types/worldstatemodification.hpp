@@ -3,13 +3,49 @@
 
 #include <functional>
 #include <memory>
+#include <optional>
 #include "factoptional.hpp"
 #include "../util/api.hpp"
-
+#include <contextualplanner/util/alias.hpp>
 
 namespace cp
 {
+struct Condition;
+struct Domain;
 struct WorldState;
+
+
+struct CONTEXTUALPLANNER_API WorldStateModificationContainerId
+{
+  bool isAction(const ActionId& pActionId) const { return actionIdToExclude && *actionIdToExclude == pActionId; }
+  bool isInference(const SetOfInferencesId& pSetOfInferencesId,
+                   const InferenceId& pInferenceId) const { return setOfInferencesIdToExclude && *setOfInferencesIdToExclude == pSetOfInferencesId &&
+        inferenceIdToExclude && *inferenceIdToExclude == pInferenceId; }
+
+  std::optional<ActionId> actionIdToExclude;
+  std::optional<SetOfInferencesId> setOfInferencesIdToExclude;
+  std::optional<InferenceId> inferenceIdToExclude;
+};
+
+
+
+struct CONTEXTUALPLANNER_API Successions
+{
+  bool empty() const { return actions.empty() && inferences.empty(); }
+  void clear() { actions.clear(); inferences.clear(); }
+
+  void addSuccesionsOptFact(const FactOptional& pFactOptional,
+                            const Domain& pDomain,
+                            const WorldStateModificationContainerId& pContainerId,
+                            const std::set<FactOptional>& pOptionalFactsToIgnore);
+
+  void print(std::string& pRes,
+             const FactOptional& pFactOptional) const;
+
+  std::set<ActionId> actions;
+
+  std::map<SetOfInferencesId, std::set<InferenceId>> inferences;
+};
 
 
 /// Modification of a world state represented in a tree structure to apply to a world state.
@@ -57,8 +93,6 @@ struct CONTEXTUALPLANNER_API WorldStateModification
   virtual void replaceArgument(const Entity& pOld,
                                const Entity& pNew) = 0;
 
-  virtual void forAllFactOpt(const std::function<void (const FactOptional&)>& pFactCallback) const = 0;
-
   /**
    * @brief Iterate over all the optional facts with fact value resolution according to the world state.
    * @param[in] pFactCallback Callback called for each optional fact of this object.
@@ -94,6 +128,11 @@ struct CONTEXTUALPLANNER_API WorldStateModification
                                    std::map<Parameter, std::set<Entity>>& pParameters,
                                    const WorldState& pWorldState,
                                    const std::string& pFromDeductionId) const = 0;
+
+  virtual void updateSuccesions(const Domain& pDomain,
+                                const WorldStateModificationContainerId& pContainerId,
+                                const std::set<FactOptional>& pOptionalFactsToIgnore) = 0;
+  virtual void printSuccesions(std::string& pRes) const = 0;
 
   /// Equality operators.
   virtual bool operator==(const WorldStateModification& pOther) const = 0;

@@ -5,7 +5,6 @@
 #include "../util/api.hpp"
 #include <contextualplanner/types/condition.hpp>
 #include <contextualplanner/types/problemmodification.hpp>
-#include <contextualplanner/types/successionscache.hpp>
 
 
 namespace cp
@@ -29,8 +28,7 @@ struct CONTEXTUALPLANNER_API Action
       precondition(pPrecondition ? std::move(pPrecondition) : std::unique_ptr<Condition>()),
       preferInContext(pPreferInContext ? std::move(pPreferInContext) : std::unique_ptr<Condition>()),
       effect(pEffect),
-      highImportanceOfNotRepeatingIt(false),
-      _successionsCache()
+      highImportanceOfNotRepeatingIt(false)
   {
   }
 
@@ -42,8 +40,7 @@ struct CONTEXTUALPLANNER_API Action
       precondition(pPrecondition ? std::move(pPrecondition) : std::unique_ptr<Condition>()),
       preferInContext(pPreferInContext ? std::move(pPreferInContext) : std::unique_ptr<Condition>()),
       effect(std::move(pEffect)),
-      highImportanceOfNotRepeatingIt(false),
-      _successionsCache()
+      highImportanceOfNotRepeatingIt(false)
   {
   }
 
@@ -53,8 +50,7 @@ struct CONTEXTUALPLANNER_API Action
       precondition(pAction.precondition ? pAction.precondition->clone() : std::unique_ptr<Condition>()),
       preferInContext(pAction.preferInContext ? pAction.preferInContext->clone() : std::unique_ptr<Condition>()),
       effect(pAction.effect),
-      highImportanceOfNotRepeatingIt(pAction.highImportanceOfNotRepeatingIt),
-      _successionsCache(pAction._successionsCache)
+      highImportanceOfNotRepeatingIt(pAction.highImportanceOfNotRepeatingIt)
   {
   }
 
@@ -66,7 +62,6 @@ struct CONTEXTUALPLANNER_API Action
     preferInContext = pAction.preferInContext ? pAction.preferInContext->clone() : std::unique_ptr<Condition>();
     effect = pAction.effect;
     highImportanceOfNotRepeatingIt = pAction.highImportanceOfNotRepeatingIt;
-    _successionsCache = pAction._successionsCache;
   }
 
   /// Check equality with another action.
@@ -109,8 +104,6 @@ struct CONTEXTUALPLANNER_API Action
   bool highImportanceOfNotRepeatingIt = false;
 
 private:
-  SuccessionsCache _successionsCache;
-
   void _throwIfNotValidForACondition(const std::unique_ptr<Condition>& pPrecondition);
   void _throwIfNotValidForAnWordStateModif(const std::unique_ptr<WorldStateModification>& pWs,
                                            const WorldState& pWorldState);

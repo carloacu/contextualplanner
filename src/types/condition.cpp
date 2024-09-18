@@ -406,6 +406,18 @@ std::unique_ptr<Condition> Condition::fromStr(const std::string& pStr,
   return _expressionParsedToCondition(expressionParsed, pOntology, pEntities, pParameters, false);
 }
 
+
+std::set<FactOptional> Condition::getFactToIgnoreInCorrespondingEffect() const
+{
+  std::set<FactOptional> res;
+  forAll([&](const FactOptional& pFactOptional, bool pIgnoreFluent) {
+    if (!pIgnoreFluent)
+      res.insert(pFactOptional);
+  });
+  return res;
+}
+
+
 std::string ConditionNode::toStr(const std::function<std::string (const Fact&)>* pFactWriterPtr,
                                  bool pPrintAnyFluent) const
 {
