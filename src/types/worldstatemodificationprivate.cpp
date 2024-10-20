@@ -1,5 +1,4 @@
 #include "worldstatemodificationprivate.hpp"
-#include <sstream>
 #include <contextualplanner/types/domain.hpp>
 #include <contextualplanner/types/ontology.hpp>
 #include <contextualplanner/types/worldstate.hpp>
@@ -83,6 +82,7 @@ std::string WorldStateModificationNode::toStr(bool pPrintAnyFluent) const
 {
   bool printAnyFluent = pPrintAnyFluent && nodeType != WorldStateModificationNodeType::ASSIGN &&
       nodeType != WorldStateModificationNodeType::INCREASE && nodeType != WorldStateModificationNodeType::DECREASE &&
+      nodeType != WorldStateModificationNodeType::MULTIPLY &&
       nodeType != WorldStateModificationNodeType::PLUS && nodeType != WorldStateModificationNodeType::MINUS;
 
   std::string leftOperandStr;
@@ -117,6 +117,8 @@ std::string WorldStateModificationNode::toStr(bool pPrintAnyFluent) const
     return "increase(" + leftOperandStr + ", " + rightOperandStr + ")";
   case WorldStateModificationNodeType::DECREASE:
     return "decrease(" + leftOperandStr + ", " + rightOperandStr + ")";
+  case WorldStateModificationNodeType::MULTIPLY:
+    return leftOperandStr + " * " + rightOperandStr;
   case WorldStateModificationNodeType::PLUS:
     return leftOperandStr + " + " + rightOperandStr;
   case WorldStateModificationNodeType::MINUS:
@@ -174,6 +176,16 @@ void WorldStateModificationNode::forAll(const std::function<void (const FactOpti
       return pFactCallback(factToCheck);
     }
   }
+  else if (nodeType == WorldStateModificationNodeType::MULTIPLY && leftOperand && rightOperand)
+  {
+    auto* leftFactPtr = _toWmFact(*leftOperand);
+    if (leftFactPtr != nullptr)
+    {
+      auto factToCheck = leftFactPtr->factOptional;
+      factToCheck.fact.setFluent(multiplyNbOrStr(leftOperand->getFluent(pSetOfFact), rightOperand->getFluent(pSetOfFact)));
+      return pFactCallback(factToCheck);
+    }
+  }
 }
 
 
@@ -198,13 +210,9 @@ void WorldStateModificationNode::forAllThatCanBeModified(const std::function<voi
     if (rightFactPtr != nullptr)
       return pFactCallback(rightFactPtr->factOptional);
   }
-  else if (nodeType == WorldStateModificationNodeType::INCREASE && leftOperand)
-  {
-    auto* leftFactPtr = _toWmFact(*leftOperand);
-    if (leftFactPtr != nullptr)
-      return pFactCallback(leftFactPtr->factOptional);
-  }
-  else if (nodeType == WorldStateModificationNodeType::DECREASE && leftOperand && rightOperand)
+  else if ((nodeType == WorldStateModificationNodeType::INCREASE ||
+            nodeType == WorldStateModificationNodeType::DECREASE ||
+            nodeType == WorldStateModificationNodeType::MULTIPLY) && leftOperand)
   {
     auto* leftFactPtr = _toWmFact(*leftOperand);
     if (leftFactPtr != nullptr)
@@ -264,6 +272,16 @@ void WorldStateModificationNode::iterateOverAllAccessibleFacts(
       return pFactCallback(factToCheck);
     }
   }
+  else if (nodeType == WorldStateModificationNodeType::MULTIPLY && leftOperand && rightOperand)
+  {
+    auto* leftFactPtr = _toWmFact(*leftOperand);
+    if (leftFactPtr != nullptr)
+    {
+      auto factToCheck = leftFactPtr->factOptional;
+      factToCheck.fact.setFluent(multiplyNbOrStr(leftOperand->getFluent(pSetOfFact), rightOperand->getFluent(pSetOfFact)));
+      return pFactCallback(factToCheck);
+    }
+  }
 }
 
 
@@ -315,6 +333,17 @@ bool WorldStateModificationNode::forAllUntilTrue(const std::function<bool (const
     {
       auto factToCheck = leftFactPtr->factOptional;
       factToCheck.fact.setFluent(minusIntOrStr(leftOperand->getFluent(pSetOfFact), rightOperand->getFluent(pSetOfFact)));
+      return pFactCallback(factToCheck);
+    }
+  }
+
+  if (nodeType == WorldStateModificationNodeType::MULTIPLY && leftOperand && rightOperand)
+  {
+    auto* leftFactPtr = _toWmFact(*leftOperand);
+    if (leftFactPtr != nullptr)
+    {
+      auto factToCheck = leftFactPtr->factOptional;
+      factToCheck.fact.setFluent(multiplyNbOrStr(leftOperand->getFluent(pSetOfFact), rightOperand->getFluent(pSetOfFact)));
       return pFactCallback(factToCheck);
     }
   }
@@ -389,6 +418,17 @@ bool WorldStateModificationNode::canSatisfyObjective(const std::function<bool (c
     }
   }
 
+  if (nodeType == WorldStateModificationNodeType::MULTIPLY && leftOperand && rightOperand)
+  {
+    auto* leftFactPtr = _toWmFact(*leftOperand);
+    if (leftFactPtr != nullptr)
+    {
+      auto factToCheck = leftFactPtr->factOptional;
+      factToCheck.fact.setFluent(multiplyNbOrStr(leftOperand->getFluent(setOfFacts), rightOperand->getFluent(setOfFacts)));
+      return pFactCallback(factToCheck, nullptr, [](const std::map<Parameter, std::set<Entity>>&){ return true; });
+    }
+  }
+
   return false;
 }
 
@@ -459,6 +499,17 @@ bool WorldStateModificationNode::iterateOnSuccessions(const std::function<bool (
     }
   }
 
+  if (nodeType == WorldStateModificationNodeType::MULTIPLY && leftOperand && rightOperand && !_successions.empty())
+  {
+    auto* leftFactPtr = _toWmFact(*leftOperand);
+    if (leftFactPtr != nullptr)
+    {
+      auto factToCheck = leftFactPtr->factOptional;
+      factToCheck.fact.setFluent(multiplyNbOrStr(leftOperand->getFluent(setOfFacts), rightOperand->getFluent(setOfFacts)));
+      return pCallback(_successions, factToCheck, nullptr, [](const std::map<Parameter, std::set<Entity>>&){ return true; });
+    }
+  }
+
   return false;
 }
 
@@ -479,7 +530,8 @@ void WorldStateModificationNode::updateSuccesions(const Domain& pDomain,
   }
   else if (nodeType == WorldStateModificationNodeType::ASSIGN ||
            nodeType == WorldStateModificationNodeType::INCREASE ||
-           nodeType == WorldStateModificationNodeType::DECREASE)
+           nodeType == WorldStateModificationNodeType::DECREASE ||
+           nodeType == WorldStateModificationNodeType::MULTIPLY)
   {
     if (leftOperand)
     {
@@ -508,7 +560,8 @@ void WorldStateModificationNode::removePossibleSuccession(const ActionId& pActio
   }
   else if (nodeType == WorldStateModificationNodeType::ASSIGN ||
            nodeType == WorldStateModificationNodeType::INCREASE ||
-           nodeType == WorldStateModificationNodeType::DECREASE)
+           nodeType == WorldStateModificationNodeType::DECREASE ||
+           nodeType == WorldStateModificationNodeType::MULTIPLY)
   {
     if (leftOperand)
       leftOperand->removePossibleSuccession(pActionIdToRemove);
@@ -531,7 +584,8 @@ void WorldStateModificationNode::printSuccesions(std::string& pRes) const
   }
   else if (nodeType == WorldStateModificationNodeType::ASSIGN ||
            nodeType == WorldStateModificationNodeType::INCREASE ||
-           nodeType == WorldStateModificationNodeType::DECREASE)
+           nodeType == WorldStateModificationNodeType::DECREASE ||
+           nodeType == WorldStateModificationNodeType::MULTIPLY)
   {
     if (leftOperand)
     {
@@ -612,18 +666,20 @@ std::optional<Entity> WorldStateModificationFact::getFluent(const SetOfFacts& pS
   return pSetOfFact.getFactFluent(factOptional.fact);
 }
 
+std::unique_ptr<WorldStateModificationNumber> WorldStateModificationNumber::create(const std::string& pStr)
+{
+  return std::make_unique<WorldStateModificationNumber>(stringToNumber(pStr));
+}
 
 std::string WorldStateModificationNumber::toStr(bool) const
 {
-  std::stringstream ss;
-  ss << nb;
-  return ss.str();
+  return numberToString(_nb);
 }
 
 bool WorldStateModificationNumber::operator==(const WorldStateModification& pOther) const
 {
   auto* otherNumberPtr = _toWmNumber(pOther);
-  return otherNumberPtr != nullptr && nb == otherNumberPtr->nb;
+  return otherNumberPtr != nullptr && _nb == otherNumberPtr->_nb;
 }
 
 

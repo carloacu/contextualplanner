@@ -31,7 +31,8 @@ struct CONTEXTUALPLANNER_API Domain
   Domain(const std::map<ActionId, Action>& pActions,
          const Ontology& pOntology,
          const SetOfEvents& pSetOfEvents = {},
-         const SetOfConstFacts& pTimelessFacts = {});
+         const SetOfConstFacts& pTimelessFacts = {},
+         const std::string& pName = "domain");
 
 
   // Actions
@@ -100,6 +101,8 @@ struct CONTEXTUALPLANNER_API Domain
   /// Get the universal unique identifier regenerated each time this object is modified.
   const std::string& getUuid() const { return _uuid; }
 
+  const std::string& getName() const { return _name; }
+
   static const SetOfEventsId setOfEventsIdFromConstructor;
 
   const Ontology& getOntology() const { return _ontology; }
@@ -111,6 +114,7 @@ struct CONTEXTUALPLANNER_API Domain
 private:
   /// Universal unique identifier regenerated each time this object is modified.
   std::string _uuid;
+  std::string _name;
   Ontology _ontology;
   SetOfConstFacts _timelessFacts;
   /// Map of action identifiers to action.

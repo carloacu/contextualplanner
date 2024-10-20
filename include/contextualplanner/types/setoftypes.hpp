@@ -23,7 +23,7 @@ struct CONTEXTUALPLANNER_API SetOfTypes
   static std::shared_ptr<Type> numberType();
 
   std::list<std::string> typesToStrs() const;
-  std::string toStr() const;
+  std::string toStr(std::size_t pIdentation = 0) const;
   bool empty() const;
 
 private:

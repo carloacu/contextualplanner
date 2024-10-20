@@ -18,7 +18,6 @@ struct WorldStateModification;
 Domain pddlToDomain(const std::string& pStr);
 
 
-
 std::unique_ptr<Condition> pddlToCondition(const std::string& pStr,
                                            std::size_t& pPos,
                                            const Ontology& pOntology,

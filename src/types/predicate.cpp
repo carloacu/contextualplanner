@@ -9,7 +9,8 @@ namespace cp
 namespace
 {
 void _parametersToStr(std::string& pStr,
-                      const std::vector<Parameter>& pParameters)
+                      const std::vector<Parameter>& pParameters,
+                      const std::string& pSeparator)
 {
   bool firstIteration = true;
   for (auto& param : pParameters)
@@ -17,7 +18,7 @@ void _parametersToStr(std::string& pStr,
     if (firstIteration)
       firstIteration = false;
     else
-      pStr += ", ";
+      pStr += pSeparator;
     pStr += param.toStr();
   }
 }
@@ -58,10 +59,24 @@ Predicate::Predicate(const std::string& pStr,
 }
 
 
- std::string Predicate::toStr() const
+std::string Predicate::toPddl() const
+{
+  std::string res = "(" + name;
+  if (!parameters.empty())
+  {
+    res += " ";
+    _parametersToStr(res, parameters, " ");
+  }
+  res += ")";
+  if (fluent)
+    res += " - " + fluent->name;
+  return res;
+}
+
+std::string Predicate::toStr() const
  {
    auto res = name + "(";
-   _parametersToStr(res, parameters);
+   _parametersToStr(res, parameters, ", ");
    res += ")";
    if (fluent)
      res += " - " + fluent->name;

@@ -1,5 +1,4 @@
 #include <contextualplanner/types/worldstatemodification.hpp>
-#include <sstream>
 #include <contextualplanner/types/domain.hpp>
 #include <contextualplanner/types/ontology.hpp>
 #include <contextualplanner/types/worldstate.hpp>

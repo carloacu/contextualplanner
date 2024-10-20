@@ -478,7 +478,8 @@ bool _lookForAPossibleEffect(bool& pSatisfyObjective,
 
     const ConditionNode* objNodePtr = pGoal.objective().fcNodePtr();
     ConditionNodeType objNodeType = objNodePtr != nullptr ? objNodePtr->nodeType : ConditionNodeType::AND;
-    bool objIsAComparison = objNodeType == ConditionNodeType::SUPERIOR || objNodeType == ConditionNodeType::INFERIOR;
+    bool objIsAComparison = objNodeType == ConditionNodeType::SUPERIOR || objNodeType == ConditionNodeType::SUPERIOR_OR_EQUAL ||
+        objNodeType == ConditionNodeType::INFERIOR || objNodeType == ConditionNodeType::INFERIOR_OR_EQUAL;
     std::map<Parameter, std::set<Entity>> newParameters;
     bool res = pFactOptionalToSatisfy.fact.isInOtherFact(pFactOptional.fact, false, &newParameters, &pParameters,
                                                          pParametersToModifyInPlacePtr, nullptr, objIsAComparison);
@@ -490,7 +491,8 @@ bool _lookForAPossibleEffect(bool& pSatisfyObjective,
     {
       const auto* objValPtr = objNodePtr->rightOperand->fcNbPtr();
       if (objValPtr != nullptr)
-        res = compIntNb(pFactOptional.fact.fluent()->value, objValPtr->nb, objNodeType == ConditionNodeType::SUPERIOR);
+        res = compIntNb(pFactOptional.fact.fluent()->value, objValPtr->nb,
+                        canBeSuperior(objNodeType), canBeEqual(objNodeType));
     }
     applyNewParams(pParameters, newParameters);
     return res;

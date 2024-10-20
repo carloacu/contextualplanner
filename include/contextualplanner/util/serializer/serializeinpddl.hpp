@@ -1,10 +1,13 @@
 #ifndef INCLUDE_CONTEXTUALPLANNER_UTIL_SERIALIZER_SERIALIZEINPDDL_HPP
 #define INCLUDE_CONTEXTUALPLANNER_UTIL_SERIALIZER_SERIALIZEINPDDL_HPP
 
-
+#include <string>
 
 namespace cp
 {
+struct Domain;
+
+std::string domainToPddl(const Domain& pDomain);
 
 
 } // End of namespace cp

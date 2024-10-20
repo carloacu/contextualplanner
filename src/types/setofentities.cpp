@@ -64,7 +64,7 @@ const Entity* SetOfEntities::valueToEntity(const std::string& pValue) const
   return nullptr;
 }
 
-std::string SetOfEntities::toStr() const
+std::string SetOfEntities::toStr(std::size_t pIdentation) const
 {
   std::map<std::string, std::string> typeToValues;
   for (auto& currValueToEntity : _valueToEntity)
@@ -86,7 +86,7 @@ std::string SetOfEntities::toStr() const
       firstIteration = false;
     else
       res += "\n";
-    res += currTypeToValues.second;
+    res += std::string(pIdentation, ' ') + currTypeToValues.second;
     if (currTypeToValues.first != "")
       res += " - " + currTypeToValues.first;
   }

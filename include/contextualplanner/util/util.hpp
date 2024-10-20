@@ -10,11 +10,34 @@
 #include <stdexcept>
 #include <string>
 #include <memory>
+#include <variant>
 
 namespace cp
 {
 struct Entity;
 struct Parameter;
+
+
+// A variant type that can hold either int or float
+using Number = std::variant<int, float>;
+
+// Function to convert a string to either an int or a float and store it in a variant
+Number stringToNumber(const std::string& str);
+
+// Overloaded operator for addition of two Number objects
+Number operator+(const Number& lhs, const Number& rhs);
+
+// Overloaded operator for substraction of two Number objects
+Number operator-(const Number& lhs, const Number& rhs);
+
+// Overloaded operator for multiplication of two Number objects
+Number operator*(const Number& lhs, const Number& rhs);
+
+// Overloaded operator for equality comparison of two Number objects
+bool operator==(const Number& lhs, const Number& rhs);
+
+// Function to convert a Number to a std::string
+std::string numberToString(const Number& num);
 
 
 extern bool CONTEXTUALPLANNER_DEBUG_FOR_TESTS;
@@ -41,10 +64,14 @@ std::optional<Entity> minusIntOrStr(const std::optional<Entity>& pNb1,
                                     const std::optional<Entity>& pNb2);
 
 CONTEXTUALPLANNER_API
-bool compIntNb(
-    const std::string& pNb1Str,
-    int pNb2,
-    bool pBoolSuperiorOrInferior);
+std::optional<Entity> multiplyNbOrStr(const std::optional<Entity>& pNb1,
+                                      const std::optional<Entity>& pNb2);
+
+CONTEXTUALPLANNER_API
+bool compIntNb(const std::string& pNb1Str,
+               const Number& pNb2,
+               bool pBoolSuperiorOrInferior,
+               bool pCanBeEqual);
 
 CONTEXTUALPLANNER_API
 std::string incrementLastNumberUntilAConditionIsSatisfied(
@@ -60,20 +87,6 @@ void split(std::vector<std::string>& pStrs,
 void ltrim(std::string& s);
 void rtrim(std::string& s);
 void trim(std::string& s);
-
-template <typename T>
-T lexical_cast(const std::string& pStr)
-{
-  bool firstChar = true;
-  for (const auto& currChar : pStr)
-  {
-    if ((currChar < '0' || currChar > '9') &&
-        !(firstChar && currChar == '-'))
-      throw std::runtime_error("bad lexical cast: source type value could not be interpreted as target");
-    firstChar = false;
-  }
-  return atoi(pStr.c_str());
-}
 
 
 template <typename T>

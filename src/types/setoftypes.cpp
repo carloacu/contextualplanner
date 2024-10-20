@@ -101,9 +101,9 @@ std::list<std::string> SetOfTypes::typesToStrs() const
 }
 
 
-std::string SetOfTypes::toStr() const
+std::string SetOfTypes::toStr(std::size_t pIdentation) const
 {
-  std::stringstream ss;
+  std::string res;
   auto strs = typesToStrs();
   bool firstIteration = true;
   for (auto& currStr : strs)
@@ -111,10 +111,10 @@ std::string SetOfTypes::toStr() const
     if (firstIteration)
       firstIteration = false;
     else
-      ss << "\n";
-    ss << currStr;
+      res += "\n";
+    res += std::string(pIdentation, ' ') + currStr;
   }
-  return ss.str();
+  return res;
 }
 
 bool SetOfTypes::empty() const

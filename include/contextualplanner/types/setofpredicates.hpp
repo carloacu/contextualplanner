@@ -11,6 +11,11 @@ namespace cp
 {
 struct SetOfTypes;
 
+enum class PredicatePddlType
+{
+  PDDL_PREDICATE,
+  PDDL_FUNCTION
+};
 
 struct CONTEXTUALPLANNER_API SetOfPredicates
 {
@@ -30,7 +35,11 @@ struct CONTEXTUALPLANNER_API SetOfPredicates
   const Predicate* nameToPredicatePtr(const std::string& pName) const;
   Predicate nameToPredicate(const std::string& pName) const;
 
+  std::string toPddl(PredicatePddlType pTypeFilter, std::size_t pIdentation = 0) const;
   std::string toStr() const;
+
+  bool empty() const { return _nameToPredicate.empty(); }
+  bool hasPredicateOfPddlType(PredicatePddlType pTypeFilter) const;
 
 private:
   std::map<std::string, Predicate> _nameToPredicate;

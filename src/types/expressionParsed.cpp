@@ -214,6 +214,7 @@ ExpressionParsed ExpressionParsed::fromPddl(const std::string& pStr,
   if (pStr[pPos] == '(')
   {
     ++pPos;
+    skipSpaces(pStr, pPos);
     std::size_t beginOfTokenPos = pPos;
 
     bool inName = true;
@@ -229,6 +230,11 @@ ExpressionParsed ExpressionParsed::fromPddl(const std::string& pStr,
         if (inName)
         {
           res.name = pStr.substr(beginOfTokenPos, pPos - beginOfTokenPos);
+          if (res.name.empty())
+          {
+            res = fromPddl(pStr, pPos);
+            return res;
+          }
           inName = false;
           continue;
         }

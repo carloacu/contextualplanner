@@ -8,6 +8,7 @@
 #include <contextualplanner/types/setofpredicates.hpp>
 #include <contextualplanner/types/worldstatemodification.hpp>
 #include <contextualplanner/util/serializer/deserializefrompddl.hpp>
+#include <contextualplanner/util/serializer/serializeinpddl.hpp>
 
 namespace
 {
@@ -82,6 +83,7 @@ void _test_loadPddlDomain()
         site material - object
         bricks cables windows - material
         car
+        ball
     )
     (:constants mainsite - site
       maincar - car)
@@ -96,10 +98,13 @@ void _test_loadPddlDomain()
         (site-built ?s - site)
         (on-site ?m - material ?s - site)
         (material-used ?m - material)
+        (held ?b - ball)
     )
 
     (:functions
         (battery-amount ?r - car)
+        (distance-to-floor ?b - ball)
+        (velocity ?b - ball)
     )
 
     (:timeless (foundations-set mainsite))
@@ -117,6 +122,18 @@ void _test_loadPddlDomain()
             (cables-installed ?s)
         )
         :implies (site-built ?s)
+    )
+
+    (:event HIT-GROUND
+        :parameters (?b - ball)
+        :precondition (and
+            (not (held ?b))
+            (<= (distance-to-floor ?b) 0)
+            (> (velocity ?b) 0)
+        )
+        :effect (
+            (assign (velocity ?b) (* -0.8 (velocity ?b)))
+        )
     )
 
     (:action BUILD-WALL
@@ -160,6 +177,42 @@ void _test_loadPddlDomain()
 )
 )");
 
+  auto pddout1 = cp::domainToPddl(domain);
+  std::cout << pddout1 << std::endl;
+  assert_eq<std::string>(R"((define
+    (domain construction)
+
+    (:types
+        site material - object
+        bricks cables windows - material
+        car
+        ball
+    )
+
+    (:constants
+        maincar - car
+        mainsite - site
+    )
+
+    (:predicates
+        (cables-installed ?s - site)
+        (foundations-set ?s - site)
+        (held ?b - ball)
+        (material-used ?m - material)
+        (on-site ?m - material ?s - site)
+        (site-built ?s - site)
+        (walls-built ?s - site)
+        (windows-fitted ?s - site)
+    )
+
+    (:functions
+        (battery-amount ?r - car) - number
+        (distance-to-floor ?b - ball) - number
+        (velocity ?b - ball) - number
+    )
+
+    (:event
+))", pddout1);
 }
 
 }

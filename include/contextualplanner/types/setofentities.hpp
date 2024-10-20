@@ -23,7 +23,9 @@ struct CONTEXTUALPLANNER_API SetOfEntities
 
   const Entity* valueToEntity(const std::string& pValue) const;
 
-  std::string toStr() const;
+  std::string toStr(std::size_t pIdentation = 0) const;
+
+  bool empty() const { return _valueToEntity.empty(); }
 
 private:
   std::map<std::string, Entity> _valueToEntity;

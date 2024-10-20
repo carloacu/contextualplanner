@@ -19,6 +19,7 @@ struct CONTEXTUALPLANNER_API Predicate
             std::size_t pBeginPos = 0,
             std::size_t* pResPos = nullptr);
 
+  std::string toPddl() const;
   std::string toStr() const;
 
   bool operator==(const Predicate& pOther) const;

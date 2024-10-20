@@ -13,7 +13,7 @@ SetOfEvents::SetOfEvents(const Event& pEvent)
 
 
 EventId SetOfEvents::add(const Event& pEvent,
-                                  const EventId& pEventId)
+                         const EventId& pEventId)
 {
   auto isIdOkForInsertion = [this](const std::string& pId)
   {

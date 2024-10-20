@@ -114,6 +114,7 @@ bool _canWmDoSomething(const std::unique_ptr<cp::WorldStateModification>& pWorld
 
 Domain::Domain()
   : _uuid(),
+    _name(),
     _ontology(),
     _timelessFacts(),
     _actions(),
@@ -128,8 +129,10 @@ Domain::Domain()
 Domain::Domain(const std::map<ActionId, Action>& pActions,
                const Ontology& pOntology,
                const SetOfEvents& pSetOfEvents,
-               const SetOfConstFacts& pTimelessFacts)
+               const SetOfConstFacts& pTimelessFacts,
+               const std::string& pName)
   : _uuid(generateUuid()),
+    _name(pName),
     _ontology(pOntology),
     _timelessFacts(pTimelessFacts),
     _actions(),

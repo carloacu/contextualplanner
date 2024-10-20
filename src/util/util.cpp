@@ -11,6 +11,20 @@ bool CONTEXTUALPLANNER_DEBUG_FOR_TESTS = false;  // Define the variable and init
 namespace
 {
 
+template <typename T>
+T _lexical_cast(const std::string& pStr)
+{
+  bool firstChar = true;
+  for (const auto& currChar : pStr)
+  {
+    if ((currChar < '0' || currChar > '9') &&
+        !(firstChar && currChar == '-'))
+      throw std::runtime_error("bad lexical cast: source type value could not be interpreted as target");
+    firstChar = false;
+  }
+  return atoi(pStr.c_str());
+}
+
 void _unfoldMapWithSet(std::list<std::map<Parameter, Entity>>& pOutMap,
                        std::map<Parameter, std::set<Entity>>& pInMap)
 {
@@ -48,6 +62,65 @@ void _unfoldMapWithSet(std::list<std::map<Parameter, Entity>>& pOutMap,
 }
 
 
+// Function to convert a string to either an int or a float and store it in a variant
+Number stringToNumber(const std::string& str) {
+    std::istringstream iss(str);
+
+    // Try to parse as an int first
+    int intValue;
+    if (iss >> intValue && iss.eof()) {
+        return intValue;  // Successfully parsed as an int
+    }
+
+    // Clear error flags and try parsing as a float
+    iss.clear();
+    iss.str(str);
+
+    float floatValue;
+    if (iss >> floatValue && iss.eof()) {
+        return floatValue;  // Successfully parsed as a float
+    }
+
+    // If neither works, throw an exception
+    throw std::invalid_argument("Invalid number format: " + str);
+}
+
+// Overloaded operator for addition of two Number objects
+Number operator+(const Number& lhs, const Number& rhs) {
+    return std::visit([](auto&& l, auto&& r) -> Number {
+        return l + r;
+    }, lhs, rhs);
+}
+
+// Overloaded operator for substraction of two Number objects
+Number operator-(const Number& lhs, const Number& rhs) {
+    return std::visit([](auto&& l, auto&& r) -> Number {
+        return l - r;
+    }, lhs, rhs);
+}
+
+// Overloaded operator for multiplication of two Number objects
+Number operator*(const Number& lhs, const Number& rhs) {
+    return std::visit([](auto&& l, auto&& r) -> Number {
+        return l * r;
+    }, lhs, rhs);
+}
+
+// Overloaded operator for equality comparison of two Number objects
+bool operator==(const Number& lhs, const Number& rhs) {
+    return std::visit([](auto&& l, auto&& r) -> bool {
+        return static_cast<float>(l) == static_cast<float>(r);
+    }, lhs, rhs);
+}
+
+// Function to convert a Number to a std::string
+std::string numberToString(const Number& num) {
+    return std::visit([](auto&& value) -> std::string {
+        return std::to_string(value);
+    }, num);
+}
+
+
 bool isNumber(const std::string& str) {
     for (char const &c : str)
         if (!std::isdigit(c))
@@ -80,11 +153,9 @@ std::optional<Entity> plusIntOrStr(const std::optional<Entity>& pNb1,
     return {};
   try
   {
-    int nb1 = lexical_cast<int>(pNb1->value);
-    int nb2 = lexical_cast<int>(pNb2->value);
-    std::stringstream ss;
-    ss << nb1 + nb2;
-    return Entity(ss.str(), pNb1->type);
+    auto nb1 = stringToNumber(pNb1->value);
+    auto nb2 = stringToNumber(pNb2->value);
+    return Entity(numberToString(nb1 + nb2), pNb1->type);
   } catch (...) {}
   return Entity(pNb1->value + pNb2->value, pNb1->type);
 }
@@ -97,24 +168,40 @@ std::optional<Entity> minusIntOrStr(const std::optional<Entity>& pNb1,
     return {};
   try
   {
-    int nb1 = lexical_cast<int>(pNb1->value);
-    int nb2 = lexical_cast<int>(pNb2->value);
-    std::stringstream ss;
-    ss << nb1 - nb2;
-    return Entity(ss.str(), pNb1->type);
+    auto nb1 = stringToNumber(pNb1->value);
+    auto nb2 = stringToNumber(pNb2->value);
+    return Entity(numberToString(nb1 - nb2), pNb1->type);
   } catch (...) {}
   return Entity(pNb1->value + "-" + pNb2->value, pNb1->type);
 }
 
 
+std::optional<Entity> multiplyNbOrStr(const std::optional<Entity>& pNb1,
+                                      const std::optional<Entity>& pNb2)
+{
+  if (!pNb1 || !pNb2 || pNb1->type != pNb2->type)
+    return {};
+  try
+  {
+    auto nb1 = stringToNumber(pNb1->value);
+    auto nb2 = stringToNumber(pNb2->value);
+    return Entity(numberToString(nb1 * nb2), pNb1->type);
+  } catch (...) {}
+  return Entity(pNb1->value + "*" + pNb2->value, pNb1->type);
+}
+
+
 bool compIntNb(
     const std::string& pNb1Str,
-    int pNb2,
-    bool pBoolSuperiorOrInferior)
+    const Number& pNb2,
+    bool pBoolSuperiorOrInferior,
+    bool pCanBeEqual)
 {
   try
   {
-    int nb1 = lexical_cast<int>(pNb1Str);
+    auto nb1 = stringToNumber(pNb1Str);
+    if (nb1 == pNb2)
+      return pCanBeEqual;
     if (pBoolSuperiorOrInferior)
       return nb1 > pNb2;
     else
@@ -141,7 +228,7 @@ std::string incrementLastNumberUntilAConditionIsSatisfied(
     {
       try
       {
-        versionNb = lexical_cast<std::size_t>(pStr.substr(nbBeginOfPos, pStr.size() - nbBeginOfPos));
+        versionNb = _lexical_cast<std::size_t>(pStr.substr(nbBeginOfPos, pStr.size() - nbBeginOfPos));
         base = pStr.substr(0, posUnderscore);
       } catch (...) {}
     }
